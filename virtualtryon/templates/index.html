@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Try-On</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .preview-image {
+            max-height: 300px;
+            max-width: 100%;
+            display: none;
+            margin-top: 10px;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .image-upload-container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .advanced-options {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Virtual Try-On</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('try_on') }}" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <!-- Avatar Image Upload -->
+                <div class="col-md-6">
+                    <div class="image-upload-container">
+                        <h4>Upload Avatar Image</h4>
+                        <input type="file" name="avatar_image" id="avatar_image" class="form-control" accept="image/*" onchange="previewImage(this, 'avatar_preview')">
+                        <img id="avatar_preview" class="preview-image" src="#" alt="Avatar Preview">
+                    </div>
+                </div>
+                
+                <!-- Clothing Image Upload -->
+                <div class="col-md-6">
+                    <div class="image-upload-container">
+                        <h4>Upload Clothing Image</h4>
+                        <input type="file" name="clothing_image" id="clothing_image" class="form-control" accept="image/*" onchange="previewImage(this, 'clothing_preview')">
+                        <img id="clothing_preview" class="preview-image" src="#" alt="Clothing Preview">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAdvancedOptions()">Show Advanced Options</button>
+            </div>
+            
+            <div class="advanced-options">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="avatar_sex" class="form-label">Avatar Sex</label>
+                        <select name="avatar_sex" id="avatar_sex" class="form-select">
+                            <option value="None">Not Specified</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="seed" class="form-label">Seed Value</label>
+                        <input type="text" name="seed" id="seed" class="form-control" placeholder="-1 for random">
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="avatar_prompt" class="form-label">Avatar Prompt</label>
+                        <input type="text" name="avatar_prompt" id="avatar_prompt" class="form-control" placeholder="Optional avatar description">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="clothing_prompt" class="form-label">Clothing Prompt</label>
+                        <input type="text" name="clothing_prompt" id="clothing_prompt" class="form-control" placeholder="Optional clothing description">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="background_prompt" class="form-label">Background Prompt</label>
+                    <input type="text" name="background_prompt" id="background_prompt" class="form-control" placeholder="Optional background description">
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Generate Try-On</button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+        
+        function toggleAdvancedOptions() {
+            const advancedOptions = document.querySelector('.advanced-options');
+            const button = document.querySelector('.btn-secondary');
+            if (advancedOptions.style.display === 'block') {
+                advancedOptions.style.display = 'none';
+                button.textContent = 'Show Advanced Options';
+            } else {
+                advancedOptions.style.display = 'block';
+                button.textContent = 'Hide Advanced Options';
+            }
+        }
+    </script>
+</body>
+</html>
