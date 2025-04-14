@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Recommender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 40px;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Fast Fashion Recommender</h1>
+    <input type="text" id="queryInput" placeholder="Enter your fashion query">
+    <button onclick="getRecommendations()">Search</button>
+
+    <div class="results" id="results"></div>
+
+    <script>
+        function getRecommendations() {
+            const query = document.getElementById("queryInput").value;
+            if (!query) {
+                alert("Please enter a query!");
+                return;
+            }
+
+            fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById("results");
+                resultsDiv.innerHTML = ""; // Clear previous results
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                    return;
+                }
+
+                data.forEach(item => {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <img src="${item.image_url}" alt="Fashion Item">
+                        <p>${item.description}</p>
+                        <p>Score: ${item.score.toFixed(2)}</p>
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>
